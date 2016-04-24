@@ -1,3 +1,4 @@
+// UPDATED BY RADIM
 /*global angular*/
 
 (function withAngular(angular) {
@@ -197,8 +198,11 @@
             $scope.initTooltip(side);
           }
           if (tryPosition) {
+            theTooltip.addClass(CSS_PREFIX + 'open'); // UPDATED BY RADIM (by css it's hidden by default, so the next funciton wouldn't work, I'll show it up just for the function and then hide again
 
             $scope.tooltipTryPosition();
+
+            theTooltip.removeClass(CSS_PREFIX + 'open'); // UPDATED BY RADIM
           }
           $scope.showTooltip();
         }
