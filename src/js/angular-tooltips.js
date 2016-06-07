@@ -32,8 +32,8 @@
       return options;
     };
   })
-  .directive('tooltips', ['$window', '$compile', '$interpolate', '$interval', '$sce', 'tooltipsConfig',
-   function manageDirective($window, $compile, $interpolate, $interval, $sce, tooltipsConfig) {
+  .directive('tooltips', ['$window', '$compile', '$interpolate', '$timeout', '$sce', 'tooltipsConfig',
+   function manageDirective($window, $compile, $interpolate, $timeout, $sce, tooltipsConfig) {
 
      var TOOLTIP_SMALL_MARGIN = 8 //px
       , TOOLTIP_MEDIUM_MARGIN = 9 //px
@@ -70,6 +70,7 @@
           , hideTarget = typeof attr.tooltipHideTarget !== 'undefined' && attr.tooltipHideTarget !== null ? attr.tooltipHideTarget : tooltipsConfig.hideTarget
           , originSide = attr.tooltipSide || tooltipsConfig.side
           , side = originSide
+          , smart = attr.tooltipSmart === "true"
           , size = attr.tooltipSize || tooltipsConfig.size
           , tryPosition = typeof attr.tooltipTry !== 'undefined' && attr.tooltipTry !== null ? $scope.$eval(attr.tooltipTry) : tooltipsConfig.try
           , className = attr.tooltipClass || tooltipsConfig.class
@@ -236,11 +237,13 @@
 
           if (tooltipScroll) {
             oldBoundingRect = thisElement[0].getBoundingClientRect();
-            positionInterval = $interval(function intervalShowTooltip() {
+            positionInterval = setInterval(function intervalShowTooltip() {
               var newBoundingRect = thisElement[0].getBoundingClientRect();
 
               if (!angular.equals(oldBoundingRect, newBoundingRect)) {
-                $scope.tooltipPositioning(side);
+                $timeout(function() {
+                  $scope.tooltipPositioning(side);
+                });
               }
 
               oldBoundingRect = newBoundingRect;
@@ -266,8 +269,8 @@
           $scope.clearTriggers();
           $scope.bindShowTriggers();
 
-          if (angular.isDefined($scope.positionInterval)) {
-            $interval.cancel(positionInterval);
+          if (angular.isDefined(positionInterval)) {
+            clearInterval(positionInterval);
             positionInterval = undefined;
           }
         };
@@ -380,7 +383,7 @@
               return offsets[worst] < offsets[key] ? worst : key;
             });
 
-          if (originSide !== bestPosition && offsets[worstOffset] < 20) {
+          if (originSide !== bestPosition && offsets[worstOffset] < 20 && smart) {
 
             side = bestPosition;
 
